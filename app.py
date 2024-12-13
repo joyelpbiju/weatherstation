@@ -10,7 +10,7 @@ CITIES_DB_PATH = r"C:\Users\Acer\PycharmProjects\weatherstation\cities.db"
 WEATHER_DB_PATH = r"C:\Users\Acer\PycharmProjects\weatherstation\weather_data.db"
 
 # OpenWeatherMap API settings
-API_KEY = "e5780636d5621aebf17df75fe667b8a7"
+API_KEY = "your OpenWeatherMap API key "
 BASE_URL = "http://api.openweathermap.org/data/2.5/weather"
 
 
