@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Weather Station</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: #fff;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            text-align: center;
+        }
+        h1 {
+            font-size: 3rem;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        h2 {
+            font-size: 1.5rem;
+            color: #dce3f2;
+            margin-bottom: 20px;
+        }
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        .search-box {
+            width: 50%;
+            padding: 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px 0 0 5px;
+        }
+        .search-button {
+            padding: 15px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #0288d1;
+            border: none;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+        }
+        .search-button:hover {
+            background-color: #0277bd;
+        }
+        .dropdown {
+            position: absolute;
+            top: 55px;
+            width: 50%;
+            background: #fff;
+            color: #333;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            max-height: 150px;
+            overflow-y: auto;
+            display: none;
+        }
+        .dropdown-item {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .dropdown-item:hover {
+            background-color: #f1f1f1;
+        }
+        .weather-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+        .weather-card {
+            width: 300px;
+            padding: 20px;
+            background-color: #fff;
+            color: #333;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        .weather-card h3 {
+            margin: 0 0 10px;
+            color: #0288d1;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 14px;
+            color: white;
+            background-color: #0288d1;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0277bd;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+    <script>
+        function searchCities(query) {
+            const dropdown = document.querySelector('.dropdown');
+            if (query.length === 0) {
+                dropdown.style.display = 'none';
+                alert("No cities found. Please enter a query.");
+                return;
+            }
+            fetch(`/search_cities?q=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    dropdown.innerHTML = '';
+                    if (data.length === 0) {
+                        alert("No cities found. Please refine your query.");
+                        dropdown.style.display = 'none';
+                        return;
+                    }
+                    data.forEach(city => {
+                        const item = document.createElement('div');
+                        item.className = 'dropdown-item';
+                        item.textContent = city;
+                        item.onclick = () => selectCity(city);
+                        dropdown.appendChild(item);
+                    });
+                    dropdown.style.display = 'block';
+                });
+        }
+
+        function selectCity(city) {
+            document.querySelector('.search-box').value = city;
+            document.querySelector('.dropdown').style.display = 'none';
+            fetchWeather(city);
+        }
+
+        function fetchWeather(city) {
+            fetch(`/weather?city=${city}`)
+                .then(response => response.json())
+                .then(data => {
+                    const weatherContainer = document.querySelector('.weather-container');
+                    if (data.error) {
+                        weatherContainer.innerHTML = `<p class="error">${data.error}</p>`;
+                    } else {
+                        weatherContainer.innerHTML = `
+                            <div class="weather-card">
+                                <h3>${data.city}</h3>
+                                <p><strong>Temperature:</strong> ${data.temperature} °C</p>
+                                <p><strong>Humidity:</strong> ${data.humidity}%</p>
+                                <p><strong>Weather:</strong> ${data.description}</p>
+                                <p><strong>Wind Speed:</strong> ${data.wind_speed} m/s</p>
+                                <a href="/history/${data.city}"><button>View Weather History</button></a>
+                            </div>
+                        `;
+                    }
+                });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Weather Station</h1>
+        <h2>Search Your City</h2>
+        <div class="search-container">
+            <input type="text" class="search-box" placeholder="Type a city name..." oninput="searchCities(this.value)">
+            <button class="search-button">Search</button>
+            <div class="dropdown"></div>
+        </div>
+        <div class="weather-container">
+            <!-- Weather cards will be dynamically displayed here -->
+        </div>
+    </div>
+</body>
+</html>
